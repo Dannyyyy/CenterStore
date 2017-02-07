@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="MessageContext-Web.config Connection String" description="MessageContext Строка подключения в web.config, используемая приложением для доступа к базе данных." defaultValue="Data Source=mssql3.gear.host;Initial Catalog=centerdatabase;User ID=centerdatabase;Password=123?123?" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\Danil\\Documents\\Visual\ Studio\ 2015\\Projects\\CSortCentrAPI\\CSortCentrAPI\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='MessageContext']/@connectionString" />
+  </parameter>
+</parameters>

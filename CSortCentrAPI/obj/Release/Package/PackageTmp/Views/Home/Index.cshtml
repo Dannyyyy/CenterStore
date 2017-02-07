@@ -1,0 +1,139 @@
+﻿<div class="row">
+    <div class="col-md-8" id="tableBlock"></div>
+        <div class="panel panel-info col-md-4">Изображение:
+            <div id="imageBlock" />
+               
+        </div>
+</div>
+
+    <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+    @section scripts
+{
+        <script type="text/javascript">
+            $(document).ready(function () {
+                GetAllMessages();
+                GetImage();
+            });
+
+            setInterval(function refresh() {
+                GetAllMessages();
+                GetImage();
+                console.log('Страница обновлена');
+            }, 30000);
+
+            function GetImage() {
+                $.ajax({
+                    url: '/api/lastimage',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        CreateImage(data);
+                    },
+                    error: function () {
+                        ImageNotFound();
+                    }
+                });
+            }
+
+            function ImageNotFound() {
+                var dataToHtml = "<div>Изображения не загружены в хранилище.</div>"
+                $("#imageBlock").html(dataToHtml);
+            }
+
+            function CreateImage(image) {
+                var dataToHtml = "<img style='width:350px; height:350px;' src=\"data:image/jpeg;base64,"
+                                    + image.Picture + "\" />"
+                $("#imageBlock").html(dataToHtml);
+            }
+
+            // Получение всех сообщений
+            function GetAllMessages() {
+                $.ajax({
+                    url: '/api/messages',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        CreateTable(data);
+                        CreateChart(data);
+                    },
+                    error: function () {
+                        console.log('При загрузке сообщений произошла ошибка.');
+                    }
+                });
+            }
+
+            // вывод полученных данных на экран
+            function CreateTable(messages) {
+                var dataToHtml = "<table class=\"table\"><th>ID-клиента</th><th>Первый числовой параметр</th><th>Второй числовой параметр</th><th>Третий числовой параметр</th><th>Первый строковый параметр</th><th>Второй строковый параметр</th>";
+                $.each(messages, function (index, message) {
+                    dataToHtml += "<tr><td>" + message.ClientId + "</td><td> " + message.NumericFirstParam + "</td><td>" +
+                    message.NumericSecondParam + "</td><td> " + message.NumericThirdParam + "</td><td>" + message.StringFirstParam + "</td><td>" + message.StringSecondParam + "</td><td></tr>";
+                });
+                dataToHtml += "</table>";
+                $("#tableBlock").html(dataToHtml);
+
+            }
+
+            // Создание графика
+            function CreateChart(messages) {
+                var dates = [];
+                var firstParams = [];
+                var secondParams = [];
+                var thirdParams = [];
+                $.each(messages, function (index, message) {
+                    dates.push(message.CreatedDateTime);
+                    firstParams.push(message.NumericFirstParam);
+                    secondParams.push(message.NumericSecondParam);
+                    thirdParams.push(message.NumericThirdParam);
+                })
+                Highcharts.chart('container', {
+                    title: {
+                        text: 'Температура',
+                        x: -20
+                    },
+                    subtitle: {
+                        text: 'Компания',
+                        x: -20
+                    },
+                    xAxis: {
+                        categories: dates
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Температура (°C)'
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
+                    },
+                    tooltip: {
+                        valueSuffix: '°C'
+                    },
+                    legend: {
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        borderWidth: 0
+                    },
+                    series: [{
+                        name: 'Первый параметр',
+                        data: firstParams
+                    }, {
+                        name: 'Второй параметр',
+                        data: secondParams
+                    }, {
+                        name: 'Третий параметр',
+                        data: thirdParams
+                    }]
+                });
+            }
+
+        </script>
+    }
